@@ -1,0 +1,86 @@
+<html>
+	<head>
+		<script type="text/javascript" src="clientJS/jquery-2.1.1.min.js"></script>
+		<script type="text/javascript" src="clientJS/jquery-ui.min.js"></script>
+		<link rel="stylesheet" href="clientCSS/jquery-ui.css" />
+		<link rel="stylesheet" href="/clientCSS/nodeChat.css" />
+		<style type="text/css">
+			
+			div#CenterBox {
+				position: absolute;
+				width: 400px;
+				left: 50%;
+				margin-left: -200px;
+				width: 400px;
+			}
+			div#Register {
+				width: 400px;
+				padding: 8px;
+				display: inline-block;
+			}
+			div#Notifications {
+				width: 400px;
+				margin-top: 4px;
+				text-align: left;
+				display: inline-block;
+			}
+		</style>
+		<script type="text/javascript">
+			$(document).ready(function() {
+			
+				$("input#user").keyup(function(event) {
+					if (event.keyCode == 13) {
+						authorizeUser($("input#user").val());
+					}
+				});
+				
+				$("button#Authorize").click(function() {
+					authorizeUser($("input#user").val());
+				});
+				
+				notify("Ready.", true);
+			});
+						
+			function authorizeUser(user) {
+				var authPromise = $.post("./auth/" + user, function(data) { } )
+					.done(function (data) {
+						window.location.href = "/msgs/" + data._id;
+					})
+					.fail(function (data) {
+						notifyError(data.responseText, true);
+					})
+			}
+			
+			function notify(msg, clear) {
+				if (clear) { 
+					$("div#Notifications").empty();
+				}
+				$("div#Notifications")
+					.append($("<div class='ui-state-highlight ui-corner-all' style='padding: .5em .7em;width: 100%'></div>")
+								.html('<span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>' +
+								msg));
+			}
+			function notifyError(msg, clear) {
+				if (clear) { 
+					$("div#Notifications").empty();
+				}
+				$("div#Notifications")
+					.append($("<div class='ui-state-error ui-corner-all' style='padding: .5em .7em;width: 100%'></div>")
+								.html('<span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>' +
+								msg));
+			}
+		</script>
+	</head>
+	<body>
+		<div style="text-align: center;"><h3>Welcome to nodeChat v0.1</h3></div>
+		<div id="CenterBox">
+			<div id="Register" class="ui-widget-content ui-corner-top">
+				<span>Desired username: </span>
+				<input type="text" id="user" name="user" class="ui-widget-content ui-corner-all" width="200px" />
+				<button id="Authorize" class="ui-button ui-widget ui-state-default ui-corner-all" role="button"><span class="ui-icon ui-icon-play"></span></button>
+			</div>
+
+			<div id="Notifications" class="ui-widget" style="font-size: .7em;"><div>
+		</div>
+	</body>
+</html>
