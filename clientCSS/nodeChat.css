@@ -29,8 +29,8 @@
 
 #UsersCount {
   font-size: 94px;
+  text-align: center;
   margin: 0 auto;
-  padding: 10px 110px;
   display: block;
   color: #666;
   opacity: 0.5;
