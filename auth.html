@@ -1,11 +1,14 @@
-<html>
+<!doctype html>
+<html lang="en">
 	<head>
-		<script type="text/javascript" src="clientJS/jquery-2.1.1.min.js"></script>
-		<script type="text/javascript" src="clientJS/jquery-ui.min.js"></script>
-		<link rel="stylesheet" href="clientCSS/jquery-ui.css" />
-		<link rel="stylesheet" href="/clientCSS/nodeChat.css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nodeChat</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/foundation/5.5.1/css/foundation.min.css" rel="stylesheet" type="text/css">
+    <link href="../clientCSS/nodeChat.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/clientJS/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="/clientJS/jquery-ui.min.js"></script>
 		<style type="text/css">
-			
 			div#CenterBox {
 				position: absolute;
 				width: 400px;
@@ -27,20 +30,20 @@
 		</style>
 		<script type="text/javascript">
 			$(document).ready(function() {
-			
+
 				$("input#user").keyup(function(event) {
 					if (event.keyCode == 13) {
 						authorizeUser($("input#user").val());
 					}
 				});
-				
+
 				$("button#Authorize").click(function() {
 					authorizeUser($("input#user").val());
 				});
-				
+
 				notify("Ready.", true);
 			});
-						
+
 			function authorizeUser(user) {
 				var authPromise = $.post("./auth/" + user, function(data) { } )
 					.done(function (data) {
@@ -50,37 +53,34 @@
 						notifyError(data.responseText, true);
 					})
 			}
-			
-			function notify(msg, clear) {
-				if (clear) { 
-					$("div#Notifications").empty();
-				}
-				$("div#Notifications")
-					.append($("<div class='ui-state-highlight ui-corner-all' style='padding: .5em .7em;width: 100%'></div>")
-								.html('<span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>' +
-								msg));
-			}
-			function notifyError(msg, clear) {
-				if (clear) { 
-					$("div#Notifications").empty();
-				}
-				$("div#Notifications")
-					.append($("<div class='ui-state-error ui-corner-all' style='padding: .5em .7em;width: 100%'></div>")
-								.html('<span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>' +
-								msg));
-			}
+
+      function notify(msg, clear) {
+        if (clear) {
+          $("div#Notifications").empty();
+        }
+        $("div#Notifications")
+          .append($("<div class='alert-box success'></div>")
+          .html(msg));
+      }
+      function notifyError(msg, clear) {
+        if (clear) {
+          $("div#Notifications").empty();
+        }
+        $("div#Notifications")
+          .append($("<div class='alert-box alert'></div>")
+          .html(msg));
+      }
 		</script>
 	</head>
 	<body>
-		<div style="text-align: center;"><h3>Welcome to nodeChat v0.1</h3></div>
 		<div id="CenterBox">
-			<div id="Register" class="ui-widget-content ui-corner-top">
-				<span>Desired username: </span>
-				<input type="text" id="user" name="user" class="ui-widget-content ui-corner-all" width="200px" />
-				<button id="Authorize" class="ui-button ui-widget ui-state-default ui-corner-all" role="button"><span class="ui-icon ui-icon-play"></span></button>
+			<h1>nodeChat <span class="version">0.1</span></h1>
+			<div id="Register">
+				<input type="text" id="user" name="user" placeholder="Desired username">
+				<button id="Authorize" role="button">Enter Chat Room</button>
 			</div>
-
-			<div id="Notifications" class="ui-widget" style="font-size: .7em;"><div>
+			<hr />
+			<div id="Notifications"><div>
 		</div>
 	</body>
 </html>
