@@ -73,6 +73,7 @@
           .done(function(data) {
             $("ul#Users").empty();
             data.users.forEach(function(u) { addAUser(u.username, u.loggedon); });
+            $("#UsersCount").text(data.count)
           })
           .fail(function(data) {
             notifyError(data.responseText, true);
@@ -160,7 +161,7 @@
               <li>
                 <a href="#">
                   Default
-                  <span class="block-list-label">7</span>
+                  <span id="UsersCount" class="block-list-label"></span>
                 </a>
               </li>
             </ul>
