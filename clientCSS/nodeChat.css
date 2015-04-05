@@ -1,11 +1,21 @@
-/* Custom CSS */
 
+
+/* Index */
 .Message {
   margin: 5px;
 }
 
 .Message .MessageUser {
   font-weight: bold;
+}
+
+#UsersCount {
+  font-size: 94px;
+  margin: 0 auto;
+  padding: 10px 110px;
+  display: block;
+  color: #666;
+  opacity: .5;
 }
 
 #SendMessage {

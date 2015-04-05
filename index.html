@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>nodeChat</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/foundation/5.5.1/css/foundation.min.css" rel="stylesheet" type="text/css">
     <link href="../clientCSS/nodeChat.css" rel="stylesheet" type="text/css">
     <script type="text/javascript" src="/clientJS/jquery-2.1.1.min.js"></script>
     <script type="text/javascript" src="/clientJS/jquery-ui.min.js"></script>
@@ -121,18 +122,16 @@
           $("div#Notifications").empty();
         }
         $("div#Notifications")
-          .append($("<div class='ui-state-highlight ui-corner-all' style='padding: .5em .7em;'></div>")
-                .html('<span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>' +
-                msg));
+          .append($("<div class='alert-box success'></div>")
+          .html(msg));
       }
       function notifyError(msg, clear) {
         if (clear) {
           $("div#Notifications").empty();
         }
         $("div#Notifications")
-          .append($("<div class='ui-state-error ui-corner-all' style='padding: .5em .7em;'></div>")
-                .html('<span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>' +
-                msg));
+          .append($("<div class='alert-box alert'></div>")
+          .html(msg));
       }
     </script>
   </head>
@@ -156,7 +155,8 @@
         <div class="grid-content">
 
           <section class="block-list">
-            <header>Rooms</header>
+            <div id="Notifications"><div>
+<!--             <header>Rooms</header>
             <ul>
               <li>
                 <a href="#">
@@ -165,7 +165,7 @@
                 </a>
               </li>
             </ul>
-          </section>
+ -->          </section>
         </div>
       </div>
 
@@ -184,6 +184,7 @@
           </div>
           <div class="grid-content medium-3 show-for-medium message-side-bar">
             <section class="block-list">
+              <span id="UsersCount"></span>
               <header>In This Room</header>
               <ul id="Users"></ul>
             </section>
