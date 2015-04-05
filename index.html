@@ -1,204 +1,186 @@
-<html>
-	<head>
-		<script type="text/javascript" src="/clientJS/jquery-2.1.1.min.js"></script>
-		<script type="text/javascript" src="/clientJS/jquery-ui.min.js"></script>
-		<link rel="stylesheet" href="/clientCSS/jquery-ui.css" />
-		<link rel="stylesheet" href="/clientCSS/nodeChat.css" />
-		<style type="text/css">
-			
-			div#Messages {
-				float: left;
-				width: 75%;
-				margin: 4px;
-				padding: 2px;
-				height: 500px;
-				overflow: scroll;
-			}
-			
-			div.Message, div.User {
-				margin: 1px;
-				padding: 2px;
-				font-size: 0.8em;
-			}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nodeChat</title>
+    <link href="../clientCSS/foundation.min.css" rel="stylesheet" type="text/css">
+    <link href="../clientCSS/nodeChat.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/clientJS/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript">
+      var _userID = '';
+      var _userName = '';
 
-			div.RefSelf {
-				background-color: #FFEFD5;
-			}
-			
-			div.Message span.MessageUser, div.User span.Username {
-				color: red;
-			}
-			
-			div.Message span.MessageText {
-				margin-left: 4px;
-				color: blue;
-			}
-			
-			div#Users {
-				float: left;
-				width: 15%;
-				margin: 4px;
-				padding: 2px;
-				height: 500px;
-				overflow: scroll;
-			}
-			
-			div.debugmsg { 
-				margin: 2px;
-				padding: 2px;
-				background-color: whitesmoke;
-				font-family: courier-new;
-				font-size: small;
-				color: red;
-			}
-			
-			input#NewMessage {
-				clear: both;
-				width: 89%;
-				margin: 4px;
-			}
-			
-			div#Notifications {
-				margin: 4px;
-				width: 90%;
-			}
-		</style>
-		<script type="text/javascript">
-			var _userID = '';
-			var _userName = '';
-			
-			$(document).ready(function() {
-			
-				// Control Event Wireup
-				$("input#NewMessage").keyup(function(event) {
-					if (event.keyCode == 13) {
-						postMessage($("input#NewMessage").val());
-					}
-				});
-				
-				$("button#SendMessage").click(function() {
-					postMessage($("input#NewMessage").val());
-				});
-			
-				// User Information 
-				fetchUserInformation();
-				
-				refreshData();
-				notify("Ready.", true);
-				$("intput#NewMessage").focus();
-			});
-			
-			function addAMessage(user, msg) {
-				var refSelf = (msg.toUpperCase().indexOf("@" + _userName.toUpperCase()) > -1) ? 'RefSelf' : '';
-				var newMsg = $("<div class='Message'></div>")
-					.addClass(refSelf)
-					.append($("<span class='MessageUser'></span>").html(user + ":"))
-					.append($("<span class='MessageText'></span>").html(decodeMsg(msg)));
-				$("div#Messages").append(newMsg).scrollTop($("div#Messages")[0].scrollHeight);
-			}
-			
-			function getMessages() {
-				var getPromise = $.get( '/getmsgs/' + _userID, function(data) { } )
-					.done(function(data) {
-						$("div#Messages").empty();
-						data.msgs.forEach(function(m) { addAMessage(m.user, m.message); });
-						$("intput#NewMessage").focus();
-					});
-				return getPromise;
-			}
-			
-			function postMessage(msg) {
-				if (msg.trim() == "") {
-					notify("Please enter a real message!", true);
-					return new Promise();
-				}
-				
-				var postPromise = $.post( '/postmsg/' + _userID + '/' + encodeMsg(msg), function(data) { }, "json")
-					.done(function(data) { 
-						data.msgs.forEach(function(m) { addAMessage(m.user, m.message); });
-						$("input#NewMessage").val("").focus();
-					})
-					.fail(function(data) {
-						notifyError(data.responseText, true);
-					});
-				return postPromise;
-			}
-			
-			function getUsers() {
-				var getPromise = $.get( '/users/' + _userID, function(data) { } )
-					.done(function(data) {
-						$("div#Users").empty();
-						data.users.forEach(function(u) { addAUser(u.username, u.loggedon); });
-					})
-					.fail(function(data) {
-						notifyError(data.responseText, true);
-					});
-				return getPromise;
-			}
-			
-			function addAUser(username, loggedon) {
-				var newMsg = $("<div class='User'></div>")
-					.append($("<span class='Username'></span>").html(username).attr('title', loggedon))
-				$("div#Users").append(newMsg).scrollTop(0);
-			}
-			
-			function refreshData() {
-				var getPromise = getMessages()
-					.then(getUsers)
-					.then(function(data) {
-						setTimeout(refreshData, 200);
-					});
-				return getPromise;
-			}
-			
-			// Utility Functions
-			function encodeMsg(msg) {
-				return encodeURIComponent(msg).replace(/'/g,"%27").replace(/"/g,"%22");
-			}
-			function decodeMsg(msg) {
-				return decodeURIComponent(msg.replace(/\+/g,  " "));
-			}
-			
-			function fetchUserInformation() {
-				var urlParts = window.location.pathname.split('/');
-				_userID = urlParts[urlParts.length - 1];
-				var getPromise = $.get('/getUserInfo/' + _userID, function(data) { } )
-					.done(function(data) {
-						_userName = data.username;
-					})
-					.fail(function(data) {
-						notifyError(data.responseText, false);
-					});
-			}
-			
-			function notify(msg, clear) {
-				if (clear) { 
-					$("div#Notifications").empty();
-				}
-				$("div#Notifications")
-					.append($("<div class='ui-state-highlight ui-corner-all' style='padding: .5em .7em;'></div>")
-								.html('<span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>' +
-								msg));
-			}
-			function notifyError(msg, clear) {
-				if (clear) { 
-					$("div#Notifications").empty();
-				}
-				$("div#Notifications")
-					.append($("<div class='ui-state-error ui-corner-all' style='padding: .5em .7em;'></div>")
-								.html('<span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>' +
-								msg));
-			}
-		</script>
-	</head>
-	<body>
-		<h3>Welcome to nodeChat v0.1</h3>
-		<div id="Messages" class="ui-widget-content ui-corner-top">
-		</div>
-		<div id="Users" class="ui-widget-content ui-corner-top"></div>
-		<input type="text" id="NewMessage" class="ui-widget-content ui-corner-all"></input>
-		<button id="SendMessage" class="ui-button ui-widget ui-state-default ui-corner-all" role="button"><span class="ui-icon ui-icon-play"></span></button>
-		<br />
-		<div id="Notifications" class="ui-widget" style="font-size: .7em;"><div>
-	</body>
+      $(document).ready(function() {
+
+        // Control Event Wireup
+        $("#NewMessage").keyup(function(event) {
+          if (event.keyCode == 13) {
+            postMessage($("#NewMessage").val());
+          }
+        });
+
+        $("button#SendMessage").click(function() {
+          postMessage($("#NewMessage").val());
+        });
+
+        // User Information
+        fetchUserInformation();
+
+        refreshData();
+        notify("Ready.", true);
+        $("#NewMessage").focus();
+      });
+
+      function addAMessage(user, msg) {
+        var refSelf = (msg.toUpperCase().indexOf("@" + _userName.toUpperCase()) > -1) ? 'RefSelf' : '';
+        var newMsg = $("<p class='Message'></p>")
+          .addClass(refSelf)
+          .append($("<span class='MessageUser'></span>").html(user + ": "))
+          .append($("<span class='MessageText'></span>").html(decodeMsg(msg)));
+        $("div#Messages").append(newMsg).scrollTop($("div#Messages")[0].scrollHeight);
+      }
+
+      function getMessages() {
+        var getPromise = $.get( '/getmsgs/' + _userID, function(data) { } )
+          .done(function(data) {
+            $("div#Messages").empty();
+            data.msgs.forEach(function(m) { addAMessage(m.user, m.message); });
+            $("#NewMessage").focus();
+          });
+        return getPromise;
+      }
+
+      function postMessage(msg) {
+        if (msg.trim() == "") {
+          notify("Please enter a real message!", true);
+          return new Promise();
+        }
+
+        var postPromise = $.post( '/postmsg/' + _userID + '/' + encodeMsg(msg), function(data) { }, "json")
+          .done(function(data) {
+            data.msgs.forEach(function(m) { addAMessage(m.user, m.message); });
+            $("#NewMessage").val("").focus();
+          })
+          .fail(function(data) {
+            notifyError(data.responseText, true);
+          });
+        return postPromise;
+      }
+
+      function getUsers() {
+        var getPromise = $.get( '/users/' + _userID, function(data) { } )
+          .done(function(data) {
+            $("ul#Users").empty();
+            data.users.forEach(function(u) { addAUser(u.username, u.loggedon); });
+            $("#UsersCount").text(data.count)
+          })
+          .fail(function(data) {
+            notifyError(data.responseText, true);
+          });
+        return getPromise;
+      }
+
+      function addAUser(username, loggedon) {
+        var newMsg = $("<li></li>")
+          .append($("<a href='#'></a>").html(username).attr('title', loggedon))
+        $("ul#Users").append(newMsg).scrollTop(0);
+      }
+
+      function refreshData() {
+        var getPromise = getMessages()
+          .then(getUsers)
+          .then(function(data) {
+            setTimeout(refreshData, 200);
+          });
+        return getPromise;
+      }
+
+      // Utility Functions
+      function encodeMsg(msg) {
+        return encodeURIComponent(msg).replace(/'/g,"%27").replace(/"/g,"%22");
+      }
+      function decodeMsg(msg) {
+        return decodeURIComponent(msg.replace(/\+/g,  " "));
+      }
+
+      function fetchUserInformation() {
+        var urlParts = window.location.pathname.split('/');
+        _userID = urlParts[urlParts.length - 1];
+        var getPromise = $.get('/getUserInfo/' + _userID, function(data) { } )
+          .done(function(data) {
+            _userName = data.username;
+          })
+          .fail(function(data) {
+            notifyError(data.responseText, false);
+          });
+      }
+
+      function notify(msg, clear) {
+        if (clear) {
+          $("div#Notifications").empty();
+        }
+        $("div#Notifications")
+          .append($("<div class='alert-box success'></div>")
+          .html(msg));
+      }
+      function notifyError(msg, clear) {
+        if (clear) {
+          $("div#Notifications").empty();
+        }
+        $("div#Notifications")
+          .append($("<div class='alert-box alert'></div>")
+          .html(msg));
+      }
+    </script>
+  </head>
+
+  <style>
+    .message-input, .message-input .inline-label, .menu-bar {margin-bottom: 0;}
+    #sidebar, .messages {border-right: 1px solid #eee;}
+    .message-side-bar {border-left: 1px solid #eee;}
+    .avatar-section {border-top: 1px solid #eee;}
+  </style>
+
+  <body>
+    <div class="grid-frame">
+      <div zf-panel position="left" id="sidebar" class="medium-grid-block collapse medium-3 large-3 vertical">
+        <div class="grid-content collapse shrink hide-for-medium">
+          <a href="" class="secondary button expand" zf-close>Close</a>
+        </div>
+        <div class="grid-content collapse shrink">
+          <img src="http://placehold.it/400x150&text=nodeChat">
+        </div>
+        <div class="grid-content">
+
+          <section class="block-list">
+            <div id="Notifications"><div>
+          </section>
+        </div>
+      </div>
+
+      <div class="grid-block collapse medium-9 large-9 vertical">
+        <div class="grid-block">
+          <div class="grid-block small-12 medium-9 vertical">
+            <div id="Messages" class="grid-content">
+              <hr />
+            </div>
+            <div class="message-input grid-content collapse shrink">
+              <span class="inline-label">
+                <input type="text" id="NewMessage"></input>
+                <button id="SendMessage" class="button" role="button">Send</button>
+              </span>
+            </div>
+          </div>
+          <div class="grid-content medium-3 show-for-medium message-side-bar">
+            <section class="block-list">
+              <span id="UsersCount"></span>
+              <header>In This Room</header>
+              <ul id="Users"></ul>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
 </html>
