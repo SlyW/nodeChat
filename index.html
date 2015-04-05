@@ -15,14 +15,14 @@
       $(document).ready(function() {
 
         // Control Event Wireup
-        $("input#NewMessage").keyup(function(event) {
+        $("#NewMessage").keyup(function(event) {
           if (event.keyCode == 13) {
-            postMessage($("input#NewMessage").val());
+            postMessage($("#NewMessage").val());
           }
         });
 
         $("button#SendMessage").click(function() {
-          postMessage($("input#NewMessage").val());
+          postMessage($("#NewMessage").val());
         });
 
         // User Information
@@ -30,7 +30,7 @@
 
         refreshData();
         notify("Ready.", true);
-        $("intput#NewMessage").focus();
+        $("#NewMessage").focus();
       });
 
       function addAMessage(user, msg) {
@@ -47,7 +47,7 @@
           .done(function(data) {
             $("div#Messages").empty();
             data.msgs.forEach(function(m) { addAMessage(m.user, m.message); });
-            $("intput#NewMessage").focus();
+            $("#NewMessage").focus();
           });
         return getPromise;
       }
@@ -61,7 +61,7 @@
         var postPromise = $.post( '/postmsg/' + _userID + '/' + encodeMsg(msg), function(data) { }, "json")
           .done(function(data) {
             data.msgs.forEach(function(m) { addAMessage(m.user, m.message); });
-            $("input#NewMessage").val("").focus();
+            $("#NewMessage").val("").focus();
           })
           .fail(function(data) {
             notifyError(data.responseText, true);
