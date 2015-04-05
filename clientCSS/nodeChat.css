@@ -8,11 +8,6 @@
   font-weight: bold;
 }
 
-#NewMessage {
-  height: 51px;
-  border-bottom: 0;
-}
-
 #SendMessage {
   margin: 0;
 }
